@@ -11,7 +11,7 @@ export const signup = async (req: Request, res: Response) => {
         if (password.length > 3) {
             hashedPassword = await bcrypt.hash(password, 10)
         } else {
-            hashedPassword = '' //Erreur dans la validation
+            hashedPassword = password //Erreur dans la validation
         }
 
         const newUser = await User.create({
@@ -28,3 +28,11 @@ export const signup = async (req: Request, res: Response) => {
         handleError(error, res)
     }
 };
+
+export const sendVerificationCode = async (user: User, req: Request, res: Response) => {
+    try {
+
+    } catch (error) {
+
+    }
+}
