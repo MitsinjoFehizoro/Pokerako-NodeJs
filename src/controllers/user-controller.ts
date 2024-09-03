@@ -1,7 +1,10 @@
+import jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
 import User from '../models/user';
-import bcrypt from 'bcrypt'
+import bcrypt, { compare } from 'bcrypt'
 import { handleError } from '../tools/handle-error';
+import dotenv from 'dotenv'
+dotenv.config()
 
 export const signup = async (req: Request, res: Response) => {
     try {
@@ -29,9 +32,31 @@ export const signup = async (req: Request, res: Response) => {
     }
 };
 
-export const sendVerificationCode = async (user: User, req: Request, res: Response) => {
-    try {
 
+export const login = async (req: Request, res: Response) => {
+    const { phone, password } = req.body
+    try {
+        const user = await User.findOne({ where: { phone: phone } })
+        if (user) {
+            const isValidPassword = await compare(password, user.password)
+            if (isValidPassword) {
+                const payload = { userId: user.id }
+                const token = jwt.sign(payload, process.env.JWT_KEY as string, { expiresIn: '24h' })
+                res.json({
+                    message: `👋 Bonjour ${user.pseudo}, content de te voir ici !`,
+                    data: user,
+                    token: token
+                })
+            } else {
+                res.status(401).json({
+                    message: "🔑 Mot de passe incorrect."
+                })
+            }
+        } else {
+            res.status(404).json({
+                message: "🤔 Numéro incorrect. Aucun compte trouvé."
+            })
+        }
     } catch (error) {
 
     }
