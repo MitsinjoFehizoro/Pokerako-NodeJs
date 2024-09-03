@@ -37,27 +37,29 @@ export const login = async (req: Request, res: Response) => {
     const { phone, password } = req.body
     try {
         const user = await User.findOne({ where: { phone: phone } })
-        if (user) {
-            const isValidPassword = await compare(password, user.password)
-            if (isValidPassword) {
-                const payload = { userId: user.id }
-                const token = jwt.sign(payload, process.env.JWT_KEY as string, { expiresIn: '24h' })
-                res.json({
-                    message: `👋 Bonjour ${user.pseudo}, content de te voir ici !`,
-                    data: user,
-                    token: token
-                })
-            } else {
-                res.status(401).json({
-                    message: "🔑 Mot de passe incorrect."
-                })
-            }
-        } else {
-            res.status(404).json({
+        if (!user) {
+            return res.status(404).json({
                 message: "🤔 Numéro incorrect. Aucun compte trouvé."
             })
         }
-    } catch (error) {
 
+        const isValidPassword = await compare(password, user.password)
+        if (isValidPassword) {
+            const payload = { userId: user.id }
+            const token = jwt.sign(payload, process.env.JWT_KEY as string, { expiresIn: '24h' })
+            res.json({
+                message: `👋 Bonjour ${user.pseudo}, content de te voir ici !`,
+                data: user,
+                token: token
+            })
+        } else {
+            res.status(401).json({
+                message: "🔑 Mot de passe incorrect."
+            })
+        }
+
+
+    } catch (error) {
+        handleError(error, res)
     }
 }

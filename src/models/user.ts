@@ -29,7 +29,7 @@ class User extends Model {
     phone!: string;
 
     @Column({
-        type: DataType.CHAR,
+        type: DataType.STRING,
         validate: {
             isCorrectFormat(value: string) {
                 if (!regexPseudo.test(value))
@@ -46,7 +46,7 @@ class User extends Model {
     balance!: number
 
     @Column({
-        type: DataType.CHAR,
+        type: DataType.STRING,
         validate: {
             isCorrectFormat(value: string) {
                 if (!regexPassword.test(value))
