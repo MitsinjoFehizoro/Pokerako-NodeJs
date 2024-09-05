@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
-import User from '../models/user';
+import User from '../models/user-model';
 import bcrypt, { compare } from 'bcrypt'
 import { handleError } from '../tools/handle-error';
 import dotenv from 'dotenv'
@@ -25,7 +25,8 @@ export const signup = async (req: Request, res: Response) => {
 
         res.status(201).json({
             message: "🎉 Votre compte a été créé avec succès !",
-            data: newUser
+            data: newUser,
+            errorMessage: null
         });
     } catch (error) {
         handleError(error, res)

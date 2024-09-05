@@ -14,7 +14,7 @@ export const auth = (req: Request, res: Response, next: NextFunction) => {
                 if (error) {
                     res.status(403).json({
                         message: "🔒 Votre session a expiré. Merci de vous reconnecter.",
-                    })
+                    }) 
                 } else {
                     req.body.user = decoded
                     next()
