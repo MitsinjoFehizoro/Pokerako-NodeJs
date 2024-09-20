@@ -47,11 +47,17 @@ export const login = async (req: Request, res: Response) => {
         const isValidPassword = await compare(password, user.password)
         if (isValidPassword) {
             const payload = { userId: user.id }
-            const token = jwt.sign(payload, process.env.JWT_KEY as string, { expiresIn: '24h' })
+            const accessToken = jwt.sign(payload, process.env.JWT_KEY as string, { expiresIn: '15m' })
+
+            const refreshToken = jwt.sign(payload, process.env.REFRESH_JWT_KEY as string, { expiresIn: '7d' })
+            res.cookie('refreshToken', refreshToken, {
+                httpOnly: true,
+                maxAge: 7 * 24 * 60 * 60 * 1000
+            })
             res.json({
                 message: `👋 Bonjour ${user.pseudo}, content de te voir ici !`,
                 data: user,
-                token: token
+                token: accessToken
             })
         } else {
             res.status(401).json({
@@ -59,8 +65,11 @@ export const login = async (req: Request, res: Response) => {
             })
         }
 
-
     } catch (error) {
         handleError(error, res)
     }
+}
+
+export const refreshAccessToken = async(req : Request, res :Response)=>{
+    
 }
