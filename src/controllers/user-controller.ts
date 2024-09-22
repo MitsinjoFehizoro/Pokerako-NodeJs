@@ -4,6 +4,7 @@ import User from '../models/user-model';
 import bcrypt, { compare } from 'bcrypt'
 import { handleError } from '../tools/handle-error';
 import dotenv from 'dotenv'
+import { error401 } from '../tools/error-status';
 dotenv.config()
 
 export const signup = async (req: Request, res: Response) => {
@@ -25,8 +26,7 @@ export const signup = async (req: Request, res: Response) => {
 
         res.status(201).json({
             message: "🎉 Votre compte a été créé avec succès !",
-            data: newUser,
-            errorMessage: null
+            data: newUser
         });
     } catch (error) {
         handleError(error, res)
@@ -69,9 +69,32 @@ export const login = async (req: Request, res: Response) => {
     }
 }
 
+export const refreshAccessToken = async (req: Request, res: Response) => {
+    const refreshToken = req.headers.cookie?.split('=')[1]
+    if (!refreshAccessToken) return error401(res)
+    try {
+        const decoded = jwt.verify(
+            refreshToken as string,
+            process.env.REFRESH_JWT_KEY as string
+        )
+        const user = await User.findByPk((decoded as { userId: string }).userId)
+        if (!user) return error401(res)
+        const payload = { userId: user.id }
+        const newAccessToken = jwt.sign(payload, process.env.JWT_KEY as string, { expiresIn: '1m' })
+        res.json({
+            message: `👋 Bonjour ${user.pseudo}, content de te voir ici !`,
+            data: user,
+            accessToken: newAccessToken
+        })
+    } catch (error) {
+        error401(res)
+    }
+}
+
 export const protectedRoute = (req: Request, res: Response) => {
     res.json({
         message: 'Ressource protegee'
     })
 }
+
 

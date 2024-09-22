@@ -2,15 +2,13 @@ import { NextFunction, Request, Response } from "express"
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
 import User from '../models/user-model';
+import { error401 } from "../tools/error-status";
 dotenv.config()
 
 export const auth = async (req: Request, res: Response, next: NextFunction) => {
 
     const authorizationHeader = req.headers.authorization
-    if (!authorizationHeader)
-        return res.status(401).json({
-            message: "🔒 Jeton d'authentification requis. Veuillez vous authentifier."
-        })
+    if (!authorizationHeader) return error401(res)
 
     try {
         const accessToken = authorizationHeader.split(' ')[1]
@@ -28,11 +26,7 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
             process.env.REFRESH_JWT_KEY as string
         )
         const user = await User.findByPk((decoded as { userId: string }).userId)
-        if (!user) {
-            return res.status(403).json({
-                message: "🔒 Votre session a expiré. Veuillez se reconnecter."
-            })
-        }
+        if (!user) return error401(res)
         const payload = { userId: user.id }
         const newAccessToken = jwt.sign(payload, process.env.JWT_KEY as string, { expiresIn: '1m' })
 
@@ -43,13 +37,11 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
             newAccessToken,
             process.env.JWT_KEY as string,
             (error, decoded) => {
-                if (error)
-                    return res.status(403).json({
-                        message: "🔒 Votre session a expiré "
-                    })
+                if (error) return error401(res)
                 req.body.user = decoded
                 next()
             }
         )
     }
 }
+
