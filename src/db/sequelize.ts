@@ -32,7 +32,7 @@ export const authenticateDataBase = async () => {
 
 export const syncronisatonDataBase = async () => {
     try {
-        await sequelize.sync({ force: true })
+        await sequelize.sync({ alter: true })
         console.log('Syncronisation réussite de la la bdd.')
     } catch (error) {
         console.error('Erreur de la syncronisation avec la bdd : ', error)

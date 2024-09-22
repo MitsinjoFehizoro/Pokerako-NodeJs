@@ -91,6 +91,17 @@ export const refreshAccessToken = async (req: Request, res: Response) => {
     }
 }
 
+export const logout = async (req: Request, res: Response) => {
+    try {
+        res.clearCookie('refreshToken')
+        res.status(201).json({
+            message : '👋 Déconnexion réussie.'
+        })
+    } catch (error) {
+        handleError(error, res)
+    }
+}
+
 export const protectedRoute = (req: Request, res: Response) => {
     res.json({
         message: 'Ressource protegee'
