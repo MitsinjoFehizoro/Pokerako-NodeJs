@@ -49,9 +49,12 @@ export const login = async (req: Request, res: Response) => {
             const payload = { userId: user.id }
             const accessToken = jwt.sign(payload, process.env.JWT_KEY as string, { expiresIn: '1m' })
             const refreshToken = jwt.sign(payload, process.env.REFRESH_JWT_KEY as string, { expiresIn: '7d' })
+            console.log('Setting refreshToken cookie:', refreshToken);
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
-                maxAge: 7 * 24 * 60 * 60 * 1000
+                secure: false,
+                sameSite: 'lax',
+                maxAge: 7 * 24 * 60 * 60 * 1000,
             })
             res.json({
                 message: `👋 Bonjour ${user.pseudo}, content de te voir ici !`,
@@ -70,8 +73,10 @@ export const login = async (req: Request, res: Response) => {
 }
 
 export const refreshAccessToken = async (req: Request, res: Response) => {
-    const refreshToken = req.headers.cookie?.split('=')[1]
-    if (!refreshAccessToken) return error401(res)
+    const { refreshToken } = req.cookies
+    if (!refreshToken) {
+        return error401(res)
+    }
     try {
         const decoded = jwt.verify(
             refreshToken as string,
@@ -95,9 +100,10 @@ export const logout = async (req: Request, res: Response) => {
     try {
         res.clearCookie('refreshToken')
         res.status(201).json({
-            message : '👋 Déconnexion réussie.'
+            message: '👋 Déconnexion réussie.'
         })
     } catch (error) {
+        console.log(error);
         handleError(error, res)
     }
 }
