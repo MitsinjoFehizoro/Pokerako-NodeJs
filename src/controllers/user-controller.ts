@@ -49,8 +49,9 @@ export const login = async (req: Request, res: Response) => {
             const payload = { userId: user.id }
             const accessToken = jwt.sign(payload, process.env.JWT_KEY as string, { expiresIn: '1m' })
             const refreshToken = jwt.sign(payload, process.env.REFRESH_JWT_KEY as string, { expiresIn: '7d' })
-            console.log('Setting refreshToken cookie:', refreshToken);
+
             res.cookie('refreshToken', refreshToken, {
+                //A corrige en production
                 httpOnly: true,
                 secure: false,
                 sameSite: 'lax',
